@@ -151,7 +151,7 @@ class SearchEngine extends DataObject implements PermissionProvider
             'direct'
         );
         if ($directSortFields) {
-            $fields->addFieldToTab('Root.Config', $directSortFields);
+            $fields->addFieldsToTab('Root.Config', $directSortFields);
         }
 
         $sortFields = $this->getSortFields(

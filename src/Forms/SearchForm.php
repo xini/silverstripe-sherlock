@@ -1,28 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fromholdio\Sherlock\Forms;
 
 use Fromholdio\Sherlock\Model\SearchEngine;
+use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Control\RequestHandler;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\HiddenField;
-use SilverStripe\Forms\RequiredFields;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\Validation\RequiredFieldsValidator;
 
 class SearchForm extends Form
 {
     protected $engine;
 
     public function __construct(
-        $controller,
+        ?RequestHandler $controller,
         $name,
         int $engineID,
         int $sourcePageID = 0,
         $phraseTitle = 'Search',
         $actionTitle = 'Search',
         $phrasePlaceholder = null
-    ){
+    ) {
         parent::__construct(
             $controller,
             $name,
@@ -35,6 +39,7 @@ class SearchForm extends Form
         if ($sourcePageID) {
             $this->setSourcePageID($sourcePageID);
         }
+
         $this->setPhraseFieldTitle($phraseTitle);
         $this->setSearchActionTitle($actionTitle);
         if ($phrasePlaceholder) {
@@ -42,48 +47,53 @@ class SearchForm extends Form
         }
     }
 
-    public function setPhraseFieldTitle($value)
+    public function setPhraseFieldTitle($value): static
     {
         $phraseField = $this->Fields()->fieldByName('Phrase');
         if ($phraseField) {
             $phraseField->setTitle($value);
         }
+
         return $this;
     }
 
-    public function setPhraseFieldPlaceholder($value)
+    public function setPhraseFieldPlaceholder($value): static
     {
         $phraseField = $this->Fields()->fieldByName('Phrase');
         if ($phraseField) {
             $phraseField->setAttribute('placeholder', $value);
         }
+
         return $this;
     }
 
-    public function setEngineID(int $engineID)
+    public function setEngineID(int $engineID): static
     {
         $engineIDField = $this->Fields()->fieldByName('EngineID');
         if ($engineIDField) {
             $engineIDField->setValue($engineID);
         }
+
         return $this;
     }
 
-    public function setSourcePageID(int $pageID = 0)
+    public function setSourcePageID(int $pageID = 0): static
     {
         $sourcePageIDField = $this->Fields()->fieldByName('SourcePageID');
         if ($sourcePageIDField) {
             $sourcePageIDField->setValue($pageID);
         }
+
         return $this;
     }
 
-    public function setSearchActionTitle($value)
+    public function setSearchActionTitle($value): static
     {
         $searchAction = $this->Actions()->fieldByName('action_doSearch');
         if ($searchAction) {
             $searchAction->setTitle($value);
         }
+
         return $this;
     }
 
@@ -102,21 +112,18 @@ class SearchForm extends Form
 
     protected function getFormActions()
     {
-        $actions = FieldList::create(
+        return FieldList::create(
             FormAction::create('doSearch', 'Search')
                 ->setUseButtonTag(true)
         );
-
-        return $actions;
     }
 
     protected function getFormValidator()
     {
-        $validator = RequiredFields::create('Phrase', 'EngineID');
-        return $validator;
+        return RequiredFieldsValidator::create('Phrase', 'EngineID');
     }
 
-    public function doSearch($data, SearchForm $form, $request)
+    public function doSearch(array $data, SearchForm $form, $request): HTTPResponse
     {
         $engineID = $data['EngineID'];
         $engine = SearchEngine::get()->byID($engineID);
@@ -129,8 +136,7 @@ class SearchForm extends Form
 
         if (isset($data['SourcePageID'])) {
             $sourcePageID = $data['SourcePageID'];
-        }
-        else {
+        } else {
             $sourcePageID = 0;
         }
 

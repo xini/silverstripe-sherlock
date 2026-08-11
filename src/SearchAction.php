@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fromholdio\Sherlock;
 
 use Fromholdio\Sherlock\Model\SearchEngine;
 use Fromholdio\Sherlock\Model\SearchLog;
-use SilverStripe\CMS\Model\SiteTree;
+use InvalidArgumentException;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
-use SilverStripe\ORM\SS_List;
+use SilverStripe\Model\List\SS_List;
 use SilverStripe\Versioned\Versioned;
 
 class SearchAction
@@ -19,19 +21,27 @@ class SearchAction
     use Configurable;
 
     protected $phrase;
+
     protected $engine;
+
     protected $directResult;
+
     protected $results;
+
     protected $startTime;
+
     protected $endTime;
+
     protected $searchPageID;
+
     protected $log;
+
     protected $logEnabled;
 
     public function __construct(
         string $phrase,
         SearchEngine $engine,
-        int $searchPageID = null,
+        ?int $searchPageID = null,
         bool $logEnabled = true,
         bool $doSearchImmediately = true
     ) {
@@ -45,7 +55,7 @@ class SearchAction
         }
     }
 
-    public function doSearch()
+    public function doSearch(): void
     {
         $phrase = $this->getPhrase();
         $engine = $this->getEngine();
@@ -75,6 +85,7 @@ class SearchAction
         if ($this->getLog() || !$this->getLogEnabled()) {
             return null;
         }
+
         $log = SearchLog::create();
         $log->Phrase = $this->getPhrase();
         $log->SearchEngineID = $this->getEngine()->ID;
@@ -88,11 +99,12 @@ class SearchAction
         return $log;
     }
 
-    public function setLog(SearchLog $log)
+    public function setLog(SearchLog $log): static
     {
         if (!$this->getLogEnabled()) {
             return $this;
         }
+
         $this->log = $log;
         return $this;
     }
@@ -102,10 +114,11 @@ class SearchAction
         if (!$this->getLogEnabled()) {
             return null;
         }
+
         return $this->log;
     }
 
-    public function getDuration()
+    public function getDuration(): int|float
     {
         $start = $this->getStartTime();
         $end = $this->getEndTime();
@@ -123,7 +136,7 @@ class SearchAction
         return ($this->logEnabled);
     }
 
-    public function setEngine(SearchEngine $engine)
+    public function setEngine(SearchEngine $engine): static
     {
         $this->engine = $engine;
         return $this;
@@ -134,7 +147,7 @@ class SearchAction
         return $this->engine;
     }
 
-    public function setSearchPageID(int $pageID = null)
+    public function setSearchPageID(?int $pageID = null): static
     {
         $this->searchPageID = $pageID;
         return $this;
@@ -145,7 +158,7 @@ class SearchAction
         return $this->searchPageID;
     }
 
-    public function setPhrase($value)
+    public function setPhrase($value): static
     {
         $this->phrase = $value;
         return $this;
@@ -156,11 +169,12 @@ class SearchAction
         return $this->phrase;
     }
 
-    public function setStartTime($value = null)
+    public function setStartTime($value = null): static
     {
         if (!$value) {
             $value = microtime(true);
         }
+
         $this->startTime = $value;
         return $this;
     }
@@ -169,16 +183,18 @@ class SearchAction
     {
         $startTime = $this->startTime;
         if (!$startTime) {
-            $startTime = $this->setStartTime();
+            return $this->setStartTime();
         }
+
         return $startTime;
     }
 
-    public function setEndTime($value = null)
+    public function setEndTime($value = null): static
     {
         if (!$value) {
             $value = microtime(true);
         }
+
         $this->endTime = $value;
         return $this;
     }
@@ -187,12 +203,13 @@ class SearchAction
     {
         $endTime = $this->endTime;
         if (!$endTime) {
-            $endTime = $this->setEndTime();
+            return $this->setEndTime();
         }
+
         return $endTime;
     }
 
-    public function hasDirectResult()
+    public function hasDirectResult(): bool
     {
         return (bool) $this->directResult;
     }
@@ -203,10 +220,11 @@ class SearchAction
         if ($result && $result->hasMethod('Link')) {
             return $result->Link();
         }
+
         return null;
     }
 
-    public function setDirectResult($result = null)
+    public function setDirectResult($result = null): static
     {
         $this->directResult = $result;
         return $this;
@@ -217,7 +235,7 @@ class SearchAction
         return $this->directResult;
     }
 
-    public function hasResults()
+    public function hasResults(): bool
     {
         return $this->getResultsCount() > 0;
     }
@@ -227,28 +245,30 @@ class SearchAction
         if ($this->hasDirectResult()) {
             return 1;
         }
+
         $results = $this->getResults();
         if ($results) {
             return $results->count();
         }
+
         return 0;
     }
 
-    public function setResults($results = null)
+    public function setResults($results = null): static
     {
-        if ($results !== null && !ClassInfo::classImplements(get_class($results), SS_List::class)) {
-            throw new \InvalidArgumentException(
+        if ($results !== null && !ClassInfo::classImplements($results::class, SS_List::class)) {
+            throw new InvalidArgumentException(
                 'SearchResult::setResults($results) expects $results to be NULL or '
-                . 'an implmentor of ' . SS_List::class . '. Instead received ' . get_class($results)
+                . 'an implmentor of ' . SS_List::class . '. Instead received ' . $results::class
             );
         }
+
         $this->results = $results;
         return $this;
     }
 
     public function getResults()
     {
-        $results = $this->results;
-        return $results;
+        return $this->results;
     }
 }

@@ -1,15 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fromholdio\Sherlock\Extensions;
 
 use Fromholdio\Sherlock\Model\SearchEngine;
 use SilverStripe\Core\ClassInfo;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\Versioned\Versioned;
+use UnexpectedValueException;
 
-class SearchRecordExtension extends DataExtension
+class SearchRecordExtension extends Extension
 {
-    public function addToSearchEngines()
+    public function addToSearchEngines(): void
     {
         $engines = $this->getOwner()->getSearchEngines();
         if ($engines) {
@@ -19,13 +22,14 @@ class SearchRecordExtension extends DataExtension
         }
     }
 
-    public function onAfterWrite()
+    public function onAfterWrite(): void
     {
         if ($this->getOwner()->hasExtension(Versioned::class)) {
             if (Versioned::get_stage() === Versioned::LIVE) {
                 return;
             }
         }
+
         $engines = $this->getOwner()->getSearchEngines();
         if ($engines) {
             foreach ($engines as $engine) {
@@ -34,17 +38,7 @@ class SearchRecordExtension extends DataExtension
         }
     }
 
-    public function onAfterPublish()
-    {
-        $engines = $this->getOwner()->getSearchEngines();
-        if ($engines) {
-            foreach ($engines as $engine) {
-                $engine->publishEntry($this->getOwner());
-            }
-        }
-    }
-    
-    public function onAfterPublishRecursive()
+    public function onAfterPublish(): void
     {
         $engines = $this->getOwner()->getSearchEngines();
         if ($engines) {
@@ -54,13 +48,24 @@ class SearchRecordExtension extends DataExtension
         }
     }
 
-    public function onAfterDelete()
+    public function onAfterPublishRecursive(): void
+    {
+        $engines = $this->getOwner()->getSearchEngines();
+        if ($engines) {
+            foreach ($engines as $engine) {
+                $engine->publishEntry($this->getOwner());
+            }
+        }
+    }
+
+    public function onAfterDelete(): void
     {
         if ($this->getOwner()->hasExtension(Versioned::class)) {
             if (Versioned::get_stage() === Versioned::LIVE) {
                 return;
             }
         }
+
         $engines = $this->getOwner()->getSearchEngines();
         if ($engines) {
             foreach ($engines as $engine) {
@@ -69,7 +74,7 @@ class SearchRecordExtension extends DataExtension
         }
     }
 
-    public function onAfterUnpublish()
+    public function onAfterUnpublish(): void
     {
         $engines = $this->getOwner()->getSearchEngines();
         if ($engines) {
@@ -78,7 +83,7 @@ class SearchRecordExtension extends DataExtension
             }
         }
     }
-    
+
     public function getSearchEngines()
     {
         $classes = $this->getOwner()->getSearchEngineClasses();
@@ -89,12 +94,14 @@ class SearchRecordExtension extends DataExtension
                 ClassInfo::subclassesFor($class)
             );
         }
+
         $engines = SearchEngine::get()->filter([
             'ClassName' => array_values($classNameFilter)
         ]);
         if ($engines->count() > 0) {
             return $engines;
         }
+
         return null;
     }
 
@@ -102,35 +109,37 @@ class SearchRecordExtension extends DataExtension
     {
         $engineClasses = $this->getOwner()->config()->get('search_engine_classes');
         if (!$engineClasses) {
-            throw new \UnexpectedValueException(
+            throw new UnexpectedValueException(
                 '$search_engine_classes must be defined on '
                 . ClassInfo::class_name($this->getOwner())
             );
         }
+
         if (!is_array($engineClasses)) {
-            throw new \UnexpectedValueException(
+            throw new UnexpectedValueException(
                 '$search_engine_classes must be an array on '
                 . ClassInfo::class_name($this->getOwner())
             );
         }
+
         if (count($engineClasses) < 1) {
-            throw new \UnexpectedValueException(
+            throw new UnexpectedValueException(
                 '$search_engine_classes must be an array with at least one value on '
                 . ClassInfo::class_name($this->getOwner())
             );
         }
-        if (count($engineClasses) > 0) {
-            foreach ($engineClasses as $engineClass) {
-                if (!is_a($engineClass, SearchEngine::class, true)) {
-                    throw new \UnexpectedValueException(
-                        'Invalid class value in $search_engines_classes on '
-                        . ClassInfo::class_name($this->getOwner())
-                        . '. Class must be sub-class of ' . SearchEngine::class
-                        . '. Invalid value supplied was "' . $engineClass . '"'
-                    );
-                }
+
+        foreach ($engineClasses as $engineClass) {
+            if (!is_a($engineClass, SearchEngine::class, true)) {
+                throw new UnexpectedValueException(
+                    'Invalid class value in $search_engines_classes on '
+                    . ClassInfo::class_name($this->getOwner())
+                    . '. Class must be sub-class of ' . SearchEngine::class
+                    . '. Invalid value supplied was "' . $engineClass . '"'
+                );
             }
         }
+
         return $engineClasses;
     }
 }

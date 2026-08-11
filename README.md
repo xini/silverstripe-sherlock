@@ -19,16 +19,16 @@ At a high level this aims to:
 
 ## Requirements
 
-* [silverstripe-cms](https://github.com/silverstripe/silverstripe-cms) ^4
-* [symbiote/silverstripe-gridfieldextensions](https://github.com/symbiote/silverstripe-gridfieldextensions) ^3.0
-* [sheadawson/silverstripe-dependentdropdownfield](https://github.com/sheadawson/silverstripe-dependentdropdownfield) ^2.0
-* [fromholdio/silverstripe-commonancestor](https://github.com/fromholdio/silverstripe-commonancestor) ^1.0
+* [silverstripe-cms](https://github.com/silverstripe/silverstripe-cms) ^6
+* [symbiote/silverstripe-gridfieldextensions](https://github.com/symbiote/silverstripe-gridfieldextensions) ^5
+* [sheadawson/silverstripe-dependentdropdownfield](https://github.com/sheadawson/silverstripe-dependentdropdownfield) ^4
+* [fromholdio/silverstripe-commonancestor](https://github.com/fromholdio/silverstripe-commonancestor) ^1.2
 
 ## Recommended
 
-* [fromholdio/silverstripe-fulltext-innodb](https://github.com/fromholdio/silverstripe-fulltext-innodb) ^1.0
-* [fromholdio/silverstripe-fulltext-filters](https://github.com/fromholdio/silverstripe-fulltext-filters) ^1.0
-* [fromholdio/silverstripe-sherlock-pages](https://github.com/fromholdio/silverstripe-sherlock-pages) ^1.0
+* [fromholdio/silverstripe-fulltext-innodb](https://github.com/fromholdio/silverstripe-fulltext-innodb)
+* [fromholdio/silverstripe-fulltext-filters](https://github.com/fromholdio/silverstripe-fulltext-filters)
+* [fromholdio/silverstripe-sherlock-pages](https://github.com/fromholdio/silverstripe-sherlock-pages)
 
 ## Installation
 

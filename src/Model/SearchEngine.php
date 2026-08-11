@@ -160,7 +160,7 @@ class SearchEngine extends DataObject implements PermissionProvider
             'fields'
         );
         if ($sortFields) {
-            $fields->addFieldToTab('Root.Config', $sortFields);
+            $fields->addFieldsToTab('Root.Config', $sortFields);
         }
 
         $fields->addFieldToTab('Root.Config', $searchPageField);
